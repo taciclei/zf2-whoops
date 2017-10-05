@@ -1,5 +1,5 @@
 {
-    "name": "ghislainf/zf2-whoops",
+    "name": "taciclei/zf2-whoops",
     "description": "PHP whoops error on ZF2 framework",
     "version": "1.0.0",
     "type": "module",
@@ -9,7 +9,7 @@
         "zf2",
         "whoops"
     ],
-    "homepage": "https://github.com/ghislainf/zf2-whoops",
+    "homepage": "https://github.com/taciclei/zf2-whoops",
     "authors": [
         {
             "name": "Ghislain de Fontenay",

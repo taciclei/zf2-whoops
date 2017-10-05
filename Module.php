@@ -29,8 +29,8 @@ class Module implements BootstrapListenerInterface
      */
     public function onBootstrap(EventInterface $e)
     {
-        $config  = $e->getTarget()->getServiceManager()->get('Config');
-        $config  = isset($config['view_manager']) ? $config['view_manager'] : array();
+        $config = $e->getTarget()->getServiceManager()->get('Config');
+        $config = isset($config['view_manager']) ? $config['view_manager'] : array();
         $request = $e->getRequest();
 
         if ($request instanceof ConsoleRequest || empty($config['display_exceptions'])) {
@@ -40,8 +40,7 @@ class Module implements BootstrapListenerInterface
         $this->run = new Run();
 
 
-        if( $request instanceof Request && $request->isXmlHttpRequest() )
-        {
+        if ($request instanceof Request && $request->isXmlHttpRequest()) {
             $jsonHandler = new JsonResponseHandler();
 
             if (!empty($config['json_exceptions']['show_trace'])) {
@@ -49,49 +48,40 @@ class Module implements BootstrapListenerInterface
             }
 
             $this->run->pushHandler($jsonHandler);
-        }
-        else
-        {
+        } else {
             $prettyPageHandler = new PrettyPageHandler();
 
-            if( isset($config['editor']) )
-            {
-                if( $config['editor'] == 'phpStorm' )
-                {
+            if (isset($config['editor'])) {
+                if ($config['editor'] == 'phpStorm') {
                     $localPath = null;
-                    if( isset($config['local_path']) )
-                    {
+                    if (isset($config['local_path'])) {
                         $localPath = $config['local_path'];
                     }
 
                     $prettyPageHandler->setEditor(
-                        function ( $file, $line ) use ( $localPath )
-                        {
-                            if( $localPath )
-                            {
-                                // if your development server is not local it's good to map remote files to local
-                                $translations = array( '^' . __DIR__ => $config['editor_path'] ); // change to your path
+                        function ($file, $line) use ($localPath) {
+                            // if your development server is not local it's good to map remote files to local
+                            $translations = array('^' . __DIR__ => $localPath); // change to your path
 
-                                foreach( $translations as $from => $to )
-                                {
-                                    $file = preg_replace( '#' . $from . '#', $to, $file, 1 );
-                                }
+                            foreach ($translations as $from => $to) {
+                                $file = preg_replace('#' . $from . '#', $to, $file, 1);
                             }
 
-                            return "pstorm://$file:$line";
+                            // IntelliJ platform requires that you send an Ajax request, else the browser will quit the page
+                            return array(
+                                'url' => "http://localhost:63342/api/file/?file=$file&line=$line",
+                                'ajax' => true
+                            );
                         }
                     );
-                }
-                else
-                {
-                    $prettyPageHandler->setEditor( $config['editor'] );
+                } else {
+                    $prettyPageHandler->setEditor($config['editor']);
                 }
             }
             $this->run->pushHandler($prettyPageHandler);
         }
 
-        if (!empty($config['whoops_no_catch']))
-        {
+        if (!empty($config['whoops_no_catch'])) {
             $this->noCatchExceptions = $config['whoops_no_catch'];
         }
 
